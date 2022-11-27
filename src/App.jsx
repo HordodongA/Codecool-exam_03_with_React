@@ -1,33 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import { useEffect, useState } from 'react'
 import './App.css'
+import UserCard from './components/UserCard'
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  // App state
+  const [users, setUsers] = useState("")
+
+  // Iput state
+  const [searchInput, setSearchInput] = useState("")
+
+  const getData = async () => {
+    const dataJson = await fetch("https://api.github.com/users")
+    const dataObject = dataJson.json()
+    return dataObject
+  }
+
+  const initPage = async () => {
+    const response = await getData()
+    setUsers(response)
+  }
+
+  useEffect(() => {
+    initPage()
+  }, [])
+
 
   return (
     <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
+
+      <div id="search-section">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search"
+          value={searchInput}
+          onChange={event => setSearchInput(event.target.value)}
+        />
+      </div> {/* search-section */}
+
+      <div id="users-grid">
+        {!users ?
+          "Loading..." :
+          users.filter(user => user.login.startsWith(searchInput)).map(user => (
+            <UserCard
+              key={user.id}
+              user={user}
+            />
+          ))}
+      </div> {/* users-grid */}
+
+    </div> /* App */
   )
 }
 
